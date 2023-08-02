@@ -33,5 +33,5 @@ https://github.com/niart120/Project_extrema
 
 - 夜綱 [@sub_827](https://twitter.com/sub_827)
 PokemonBDSPRNGLibraryをはじめとする乱数調整関連のライブラリを開発・公開されているほか, 実装に関するアドバイスを頂きました.
-- ハルカ [@nPnnc)nCWXsgpdl](https://twitter.com/nPnnc9nCWXsgpdl)
+- ハルカ [@nPnnc9nCWXsgpdl](https://twitter.com/nPnnc9nCWXsgpdl)
 ツール出力の整合性検証にご協力いただきました.
