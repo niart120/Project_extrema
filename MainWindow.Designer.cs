@@ -1,6 +1,6 @@
 ﻿namespace Project_extrema
 {
-    partial class MainForm
+    partial class BDSPSearchForm
     {
         /// <summary>
         ///  Required designer variable.
@@ -580,7 +580,7 @@
             Controls.Add(groupBox1);
             Controls.Add(groupBox2);
             Controls.Add(dataGridView1);
-            Name = "MainForm";
+            Name = "BDSPSearchForm";
             Text = "BDSPSearch";
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             groupBox2.ResumeLayout(false);

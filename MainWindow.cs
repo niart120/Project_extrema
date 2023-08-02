@@ -6,7 +6,7 @@ using static PokemonStandardLibrary.Gen8.Pokemon;
 
 namespace Project_extrema
 {
-    public partial class MainForm : Form
+    public partial class BDSPSearchForm : Form
     {
         private static readonly string[] SinnohSubLegs = { "ユクシー", "アグノム", "ヒードラン", "レジギガス" };
         private static readonly uint[] SinnohSubLegsLv = { 50, 50, 70, 70 };
@@ -23,7 +23,7 @@ namespace Project_extrema
         private static readonly string[][] spieciesNamesArray = new string[][] { SinnohSubLegs, SinnohLegsMyths, Roamers, RamanasSubLegs, RamanasLegs };
         private static readonly uint[][] spieciesLvsArray = new uint[][] { SinnohSubLegsLv, SinnohLegsMythsLv, RoamersLv, RamanasSubLegsLv, RamanasLegsLv };
 
-        public MainForm()
+        public BDSPSearchForm()
         {
             InitializeComponent();
             //基本情報内のコンボボックスを初期化
@@ -40,6 +40,8 @@ namespace Project_extrema
             SynchronizeComboBox.Items.Clear();
             SynchronizeComboBox.Items.AddRange(naturelist.ToArray()[0..^1]);
             //各コンボボックスのインデックスリセット
+            SymbolTypeComboBox.SelectedIndex = 0;
+            SpeciesComboBox.SelectedIndex = 0;
             SynchronizeComboBox.SelectedIndex = 0;
             NatureComboBox.SelectedIndex = NatureComboBox.Items.Count - 1;
             GenderComboBox.SelectedIndex = GenderComboBox.Items.Count - 1;
@@ -86,69 +88,47 @@ namespace Project_extrema
 
             Synchronize sync = new Synchronize(SynchronizeComboBox.Text.ConvertToNature());
 
-            var results = new List<string[]>();
-            for (uint i = 0; i < searchRange; i++, state.Advance())
+            var natureCondition = (Nature)NatureComboBox.SelectedIndex;
+            var genderCondition = (GenderCondition)GenderComboBox.SelectedIndex;
+            var shinyCondition = (ShinyCondition)ShinyComboBox.SelectedIndex;
+            var minHeight = (byte)MinHeight.Value;
+            var maxHeight = (byte)MaxHeight.Value;
+            var minWeight = (byte)MinWeight.Value;
+            var maxWeight = (byte)MaxWeight.Value;
+
+            SearchCondition sc = new SearchCondition(natureCondition, genderCondition, shinyCondition, minHeight, maxHeight, minWeight, maxWeight);
+
+            Task task = new(() =>
             {
-                var pk = UseSynchronize.Checked ? generator.Generate(state, sync) : generator.Generate(state);
-                //絞り込み
-                //性格
-                if (NatureComboBox.Text != "---")
+                this.Invoke(() =>
                 {
-                    var targetNature = NatureComboBox.Text.ConvertToNature();
-                    if (pk.Nature != targetNature) continue;
-                }
-                //性別
-                if (GenderComboBox.Text != "-")
+                    SearchButton.Enabled = false;
+                });
+                var results = new List<string[]>();
+                for (uint i = 0; i < searchRange; i++, state.Advance())
                 {
-                    var targetGender = (Gender)GenderComboBox.SelectedIndex;
-                    if (pk.Gender != targetGender) continue;
-                }
-                //色違い
-                if (ShinyComboBox.Text != "-")
-                {
-                    if (ShinyComboBox.Text == "☆&◇")
+                    var pk = UseSynchronize.Checked ? generator.Generate(state, sync) : generator.Generate(state);
+                    if (!sc.Validate(pk))continue;
+
+                    var advance = initadv + i;
+                    results.Add(Misc.ToResultArray(advance, pk));
+                    if (results.Count >= 1000)
                     {
-                        if (pk.Shiny == ShinyType.NotShiny) continue;
-                    }
-                    else
-                    {
-                        var targetShinyType = (ShinyType)ShinyComboBox.SelectedIndex;
-                        if (pk.Shiny != targetShinyType) continue;
+                        //TODO:なんかモーダルメッセージを出して打ち切る
+                        break;
                     }
                 }
-                //高さ
-                var minheight = (uint)MinHeight.Value;
-                var maxheight = (uint)MaxHeight.Value;
-                if (minheight > maxheight)
+                this.Invoke(() => 
                 {
-                    (minheight, maxheight) = (maxheight, minheight);
-                }
-                if (pk.HeightScale < minheight) continue;
-                if (maxheight < pk.HeightScale) continue;
+                    //TODO:アホなことしてる気がするのでどうにかしたい
+                    dataGridView1.Rows.Clear();
+                    foreach (var row in results) dataGridView1.Rows.Add(row);
+                    SearchButton.Enabled = true;
 
-
-                //重さ
-                var minweight = (uint)MinWeight.Value;
-                var maxweight = (uint)MaxWeight.Value;
-                if (minweight > maxweight)
-                {
-                    (minweight, maxweight) = (maxweight, minweight);
-                }
-                if (pk.WeightScale < minweight) continue;
-                if (maxweight < pk.WeightScale) continue;
-
-                var advance = initadv + i;
-                results.Add(Misc.ToResultArray(advance, pk));
-                if (results.Count >= 1000)
-                {
-                    //TODO:なんかモーダルメッセージを出して打ち切る
-                    break;
-                }
-            }
-            //TODO:アホなことしてる気がするのでどうにかしたい
-            dataGridView1.Rows.Clear();
-            foreach (var row in results) dataGridView1.Rows.Add(row);
-
+                });
+            });
+            task.Start();
+            
 
         }
 
