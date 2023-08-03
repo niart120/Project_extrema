@@ -15,7 +15,7 @@ namespace Project_extrema
         private static readonly string[] Roamers = { "エムリット", "クレセリア" };
         private static readonly uint[] RoamersLv = { 50, 50 };
 
-        private static readonly string[] RamanasSubLegs = { "フリーザー", "サンダー", "ファイヤー", "ライコウ", "エンティ", "スイクン", "レジロック", "レジアイス", "レジスチル", "ラティアス", "ラティオス" };
+        private static readonly string[] RamanasSubLegs = { "フリーザー", "サンダー", "ファイヤー", "ライコウ", "エンテイ", "スイクン", "レジロック", "レジアイス", "レジスチル", "ラティアス", "ラティオス" };
         private static readonly uint[] RamanasSubLegsLv = { 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70 };
         private static readonly string[] RamanasLegs = { "ミュウツー", "ルギア", "ホウオウ", "カイオーガ", "グラードン", "レックウザ" };
         private static readonly uint[] RamanasLegsLv = { 70, 70, 70, 70, 70, 70 };
@@ -56,6 +56,7 @@ namespace Project_extrema
             //分類に対応するポケモン名一覧に更新
             SpeciesComboBox.Items.Clear();
             SpeciesComboBox.Items.AddRange(spieciesNamesArray[STidx]);
+            SpeciesComboBox.SelectedIndex = 0;
         }
 
         private void SearchButton_Click(object sender, EventArgs e)
@@ -84,7 +85,17 @@ namespace Project_extrema
 
             var pokename = SpeciesComboBox.Text;
             var pokeLv = spieciesLvsArray[stidx][spidx];
-            StaticSymbolGenerator generator = new StaticSymbolGenerator(pokename, pokeLv, 3);
+
+            //ハマナス伝説の場合は強制的に隠れ特性
+            var hiddenAbility = (stidx == 3) || (stidx == 4);
+
+            var isRoamers = (stidx == 2);
+            var useSync = UseSynchronize.Checked;
+
+            var tsv = 0u;//仮tsv
+            var generator = new StaticSymbolGenerator(pokename, pokeLv, tsv, 3, hiddenAbility);
+            var roamergenerator = new RoamerGenerator(pokename, pokeLv, tsv);
+
 
             Synchronize sync = new Synchronize(SynchronizeComboBox.Text.ConvertToNature());
 
@@ -96,6 +107,7 @@ namespace Project_extrema
             var minWeight = (byte)MinWeight.Value;
             var maxWeight = (byte)MaxWeight.Value;
 
+            //Validator生成
             SearchCondition sc = new SearchCondition(natureCondition, genderCondition, shinyCondition, minHeight, maxHeight, minWeight, maxWeight);
 
             Task task = new(() =>
@@ -107,8 +119,18 @@ namespace Project_extrema
                 var results = new List<string[]>();
                 for (uint i = 0; i < searchRange; i++, state.Advance())
                 {
-                    var pk = UseSynchronize.Checked ? generator.Generate(state, sync) : generator.Generate(state);
-                    if (!sc.Validate(pk))continue;
+                    Individual pk = null;
+                    //TODO:この書き方を本当にどうにかしたい
+                    if (isRoamers)
+                    {
+                        pk = useSync ? roamergenerator.Generate(state, sync) : roamergenerator.Generate(state);
+                    }
+                    else
+                    {
+                        pk = useSync ? generator.Generate(state, sync) : generator.Generate(state);
+                    }
+
+                    if (!sc.Validate(pk)) continue;
 
                     var advance = initadv + i;
                     results.Add(Misc.ToResultArray(advance, pk));
@@ -118,7 +140,7 @@ namespace Project_extrema
                         break;
                     }
                 }
-                this.Invoke(() => 
+                this.Invoke(() =>
                 {
                     //TODO:アホなことしてる気がするのでどうにかしたい
                     dataGridView1.Rows.Clear();
@@ -128,7 +150,7 @@ namespace Project_extrema
                 });
             });
             task.Start();
-            
+
 
         }
 
