@@ -48,7 +48,7 @@ namespace Project_extrema
             ShinyComboBox.SelectedIndex = ShinyComboBox.Items.Count - 1;
         }
 
-        private void SymbolTypeComboBox_TextChanged(object sender, EventArgs e)
+        private void SymbolTypeComboBox_TextChanged(object? sender, EventArgs e)
         {
             var STidx = SymbolTypeComboBox.SelectedIndex;
             if (STidx == -1) return;
