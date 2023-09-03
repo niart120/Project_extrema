@@ -20,8 +20,11 @@ namespace Project_extrema
         private static readonly string[] RamanasLegs = { "ミュウツー", "ルギア", "ホウオウ", "カイオーガ", "グラードン", "レックウザ" };
         private static readonly uint[] RamanasLegsLv = { 70, 70, 70, 70, 70, 70 };
 
-        private static readonly string[][] spieciesNamesArray = new string[][] { SinnohSubLegs, SinnohLegsMyths, Roamers, RamanasSubLegs, RamanasLegs };
-        private static readonly uint[][] spieciesLvsArray = new uint[][] { SinnohSubLegsLv, SinnohLegsMythsLv, RoamersLv, RamanasSubLegsLv, RamanasLegsLv };
+        private static readonly string[] Gifts = { "ミュウ", "ジラーチ" };
+        private static readonly uint[] GiftsLv = { 1, 5 };
+
+        private static readonly string[][] spieciesNamesArray = new string[][] { SinnohSubLegs, SinnohLegsMyths, Roamers, RamanasSubLegs, RamanasLegs, Gifts };
+        private static readonly uint[][] spieciesLvsArray = new uint[][] { SinnohSubLegsLv, SinnohLegsMythsLv, RoamersLv, RamanasSubLegsLv, RamanasLegsLv, GiftsLv };
 
         public BDSPSearchForm()
         {
@@ -86,14 +89,20 @@ namespace Project_extrema
             var pokename = SpeciesComboBox.Text;
             var pokeLv = spieciesLvsArray[stidx][spidx];
 
+            var fixedAbility = 3U;
             //ハマナス伝説の場合は強制的に隠れ特性
-            var hiddenAbility = (stidx == 3) || (stidx == 4);
+            if((stidx == 3) || (stidx == 4)) fixedAbility = 2;
+            //イベント系(ミュウ・ジラーチ)の場合は特性1で固定
+            if ((stidx == 5)) fixedAbility = 0;
+
+            //イベント系はブロックルーチンが掛かる
+            var neverShiny = (stidx == 5);
 
             var isRoamers = (stidx == 2);
             var useSync = UseSynchronize.Checked;
 
             var tsv = 0u;//仮tsv
-            var generator = new StaticSymbolGenerator(pokename, pokeLv, tsv, 3, hiddenAbility);
+            var generator = new StaticSymbolGenerator(pokename, pokeLv, tsv, 3, fixedAbility, neverShiny);
             var roamergenerator = new RoamerGenerator(pokename, pokeLv, tsv);
 
 

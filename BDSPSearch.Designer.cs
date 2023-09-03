@@ -443,7 +443,7 @@
             // 
             SymbolTypeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             SymbolTypeComboBox.FormattingEnabled = true;
-            SymbolTypeComboBox.Items.AddRange(new object[] { "シンオウ準伝説", "シンオウ伝説・幻", "徘徊", "ハマナス準伝説", "ハマナス伝説" });
+            SymbolTypeComboBox.Items.AddRange(new object[] { "シンオウ準伝説", "シンオウ伝説・幻", "徘徊", "ハマナス準伝説", "ハマナス伝説", "イベント" });
             SymbolTypeComboBox.Location = new Point(80, 200);
             SymbolTypeComboBox.Name = "SymbolTypeComboBox";
             SymbolTypeComboBox.Size = new Size(239, 40);

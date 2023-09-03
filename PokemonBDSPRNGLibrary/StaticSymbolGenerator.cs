@@ -8,7 +8,7 @@ namespace PokemonBDSPRNGLibrary.Generators
         : IGeneratable<Pokemon.Individual>, IGeneratable<Pokemon.Individual, Synchronize>, IGeneratable<Pokemon.Individual, CuteCharm>
     {
         private readonly bool _neverShiny;
-        private readonly bool _hiddenAbility;
+        private readonly uint _fixedAbility;
         private readonly uint _flawlessIVs;
         private readonly Pokemon.Species _species;
         private readonly uint _lv;
@@ -30,8 +30,20 @@ namespace PokemonBDSPRNGLibrary.Generators
 
             var ivs = seed.GenerateIVs(_flawlessIVs);
 
-            var ability = seed.GetRand(2);
-            ability = _hiddenAbility ? 2 : ability;
+            var ability = _fixedAbility;
+            //特性固定無しの場合
+            if (_fixedAbility == 3)
+            {
+                ability = seed.GetRand(2);
+            }
+            //夢特性固定の場合
+            else if (_fixedAbility == 2)
+            {
+                seed.GetRand(2);//カラ消費
+                ability = _fixedAbility;
+            }
+            //その他 -> _fixedAbility
+
             var gender = seed.GenerateGender(_species.GenderRatio);
             var nature = (Nature)seed.GetRand(25);
 
@@ -56,8 +68,20 @@ namespace PokemonBDSPRNGLibrary.Generators
 
             var ivs = seed.GenerateIVs(_flawlessIVs);
 
-            var ability = seed.GetRand(2);
-            ability = _hiddenAbility ? 2 : ability;
+            var ability = _fixedAbility;
+            //特性固定無しの場合
+            if (_fixedAbility == 3)
+            {
+                ability = seed.GetRand(2);
+            }
+            //夢特性固定の場合
+            else if (_fixedAbility == 2)
+            {
+                seed.GetRand(2);//カラ消費
+                ability = _fixedAbility;
+            }
+            //その他 -> _fixedAbility
+
             var gender = seed.GenerateGender(_species.GenderRatio);
             var nature = (uint)synchronize.FixedNature < 25 ? synchronize.FixedNature : (Nature)seed.GetRand(25);
 
@@ -82,8 +106,20 @@ namespace PokemonBDSPRNGLibrary.Generators
 
             var ivs = seed.GenerateIVs(_flawlessIVs);
 
-            var ability = seed.GetRand(2);
-            ability = _hiddenAbility ? 2 : ability;
+            var ability = _fixedAbility;
+            //特性固定無しの場合
+            if (_fixedAbility == 3)
+            {
+                ability = seed.GetRand(2);
+            }
+            //夢特性固定の場合
+            else if (_fixedAbility == 2)
+            {
+                seed.GetRand(2);//カラ消費
+                ability = _fixedAbility;
+            }
+            //その他 -> _fixedAbility
+
             var gender = seed.GenerateGender(_species.GenderRatio, cuteCharm.FixedGender);
             var nature = (Nature)seed.GetRand(25);
 
@@ -93,8 +129,8 @@ namespace PokemonBDSPRNGLibrary.Generators
             return _species.GetIndividual(_lv, ivs, ec, pid, nature, ability, gender, height, weight).SetShinyType(shinyType);
         }
 
-        public StaticSymbolGenerator(string name, uint lv, uint tsv, uint flawlessIVs = 0, bool hiddenAbility = false, bool neverShiny = false)
-            => (_species, _lv, _flawlessIVs, _hiddenAbility, _neverShiny, _tsv) = (Pokemon.GetPokemon(name), lv, flawlessIVs, hiddenAbility, neverShiny, tsv);
+        public StaticSymbolGenerator(string name, uint lv, uint tsv, uint flawlessIVs = 0, uint fixedAbility = 3, bool neverShiny = false)
+            => (_species, _lv, _flawlessIVs, _fixedAbility, _neverShiny, _tsv) = (Pokemon.GetPokemon(name), lv, flawlessIVs, fixedAbility, neverShiny, tsv);
     }
 
     public readonly struct Synchronize
@@ -103,6 +139,7 @@ namespace PokemonBDSPRNGLibrary.Generators
         public Synchronize(Nature nature)
             => FixedNature = nature;
     }
+
     public readonly struct CuteCharm
     {
         public Gender FixedGender { get; }
